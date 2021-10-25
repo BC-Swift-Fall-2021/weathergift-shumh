@@ -22,7 +22,7 @@ class LocationDetailViewController: UIViewController {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var pageControl: UIPageControl!
     @IBOutlet weak var tableView: UITableView!
-    
+    @IBOutlet weak var collectionView: UICollectionView!
     
     var weatherDetail: WeatherDetail!
     var locationIndex = 0
@@ -32,6 +32,8 @@ class LocationDetailViewController: UIViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
+        collectionView.delegate = self
+        collectionView.dataSource = self
         
         updateUserInterface()
     }
@@ -67,6 +69,7 @@ class LocationDetailViewController: UIViewController {
                 self.summaryLabel.text = self.weatherDetail.summary
                 self.imageView.image = UIImage(named: self.weatherDetail.dayIcon)
                 self.tableView.reloadData()
+                self.collectionView.reloadData()
             }
         }
     }
@@ -112,4 +115,18 @@ extension LocationDetailViewController: UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 80
     }
+}
+
+extension LocationDetailViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return weatherDetail.hourlyWeatherData.count
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let hourlyCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HourlyCell", for: indexPath) as! HourlyCollectionViewCell
+        hourlyCell.hourlyWeather = weatherDetail.hourlyWeatherData[indexPath.row]
+        return hourlyCell
+    }
+    
 }

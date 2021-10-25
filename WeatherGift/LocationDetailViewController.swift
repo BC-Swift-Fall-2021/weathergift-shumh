@@ -165,14 +165,27 @@ extension LocationDetailViewController: CLLocationManagerDelegate {
         case .restricted:
             self.oneButtonAlert(title: "Location Services Denied", message: "It may be that parental controls are restricting location use in this app.")
         case .denied:
-            // Handle alert with ability to change
-            break
+            showAlertToPrivacySettings(title: "User has not authorized location services", message: "Select 'Settings' below to enable device settings and enable location services")
         case .authorizedAlways, .authorizedWhenInUse:
             locationManager.requestLocation()
         @unknown default:
             print("DEVELOPER ALERT: Unknown case of status in handleAuthenticalStatus \(status)")
         }
     }
+    
+    func showAlertToPrivacySettings(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message:message, preferredStyle: .alert)
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else {
+            print("Something went wrong getting the UIApplication.openSettingsURLString")
+            return
+        }
+        let settingsAction = UIAlertAction(title: "Settings", style: .default) { (_) in UIApplication.shared.open(settingsURL, options: [:], completionHandler: nil)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(settingsAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
+        }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // Deal with Change in location
@@ -191,13 +204,11 @@ extension LocationDetailViewController: CLLocationManagerDelegate {
                 print("Error: retrieving place.")
                 locationName = "Could not find location"
             }
-            print("locationName = \(locationName)")
             
             let pageViewController = UIApplication.shared.windows.first!.rootViewController as! PageViewController
             pageViewController.weatherLocations[self.locationIndex].latitude = currentLocation.coordinate.latitude
             pageViewController.weatherLocations[self.locationIndex].longitude = currentLocation.coordinate.longitude
             pageViewController.weatherLocations[self.locationIndex].name = locationName
-            
             self.updateUserInterface()
         }
     }
@@ -205,4 +216,5 @@ extension LocationDetailViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("ERROR: \(error.localizedDescription). Failed to get Device Location.")
     }
+
 }
